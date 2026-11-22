@@ -265,7 +265,7 @@ describe('signXDR()', () => {
   it('throws when Freighter returns no signature at all', async () => {
     vi.mocked(freighter.signTransaction).mockResolvedValue({} as never)
     const { ref } = await connected()
-    await expect(wallet(ref).signXDR('XDR')).rejects.toThrow('Freighter returned no signed transaction')
+    await expect(wallet(ref).signXDR('XDR')).rejects.toThrow('Your wallet returned no signed transaction')
   })
 
   it('propagates a rejected signTransaction call', async () => {

@@ -35,6 +35,9 @@ for (const route of ROUTES) {
   for (const theme of THEMES) {
     test(`${route.name} renders in the ${theme} theme`, async ({ page }) => {
       await gotoInTheme(page, route.path, theme)
+      if (route.name === 'dashboard') {
+        await expect(page.getByText('Access Dashboard', { exact: true })).toBeVisible()
+      }
       await expect(page).toHaveScreenshot(`${route.name}-${theme}.png`)
     })
   }

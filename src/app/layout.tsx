@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { Providers } from '@/components/providers'
@@ -80,18 +81,19 @@ export const viewport = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <ServiceWorkerRegistration />
-        <Providers>
+        <Providers nonce={nonce}>
           {children}
         </Providers>
       </body>

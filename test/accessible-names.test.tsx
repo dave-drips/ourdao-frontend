@@ -20,6 +20,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/lib/wallet', () => ({
+  useOptionalWallet: () => ({ address: null }),
   useWallet: () => ({
     address: 'GALICE',
     isConnected: true,

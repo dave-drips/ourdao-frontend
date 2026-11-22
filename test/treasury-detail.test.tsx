@@ -46,11 +46,18 @@ vi.mock('@/lib/dao-client', () => ({
     getTreasuryProposal: (...a: unknown[]) => mockGetTreasuryProposal(...a),
     hasVoted: (...a: unknown[]) => mockHasVoted(...a),
     getDocument: vi.fn().mockResolvedValue(null),
+    getToken: vi.fn().mockResolvedValue('CTOKEN'),
     getTotalMembers: vi.fn().mockResolvedValue(10),
     getActiveMembers: vi.fn().mockResolvedValue(8),
     getConsensusThreshold: vi.fn().mockResolvedValue(5100),
     getTreasuryBalance: vi.fn().mockResolvedValue(BigInt(1000000000)),
     isPaused: vi.fn().mockResolvedValue(false),
+  },
+  tokenRead: {
+    getSymbol: vi.fn().mockResolvedValue('OUSD'),
+    getDecimals: vi.fn().mockResolvedValue(7),
+    getName: vi.fn().mockResolvedValue('OurDAO USD'),
+    getBalance: vi.fn().mockResolvedValue(BigInt(0)),
   },
   daoWrite: () => ({
     voteOnTreasuryProposal: (...a: unknown[]) => mockVoteOnTreasury(...a),
@@ -93,7 +100,7 @@ describe('TreasuryProposalDetailPage (/treasury/[id])', () => {
       expect(screen.getAllByText(/Treasury Proposal #42/)[0]).toBeInTheDocument()
     })
 
-    expect(screen.getByText('5')).toBeInTheDocument() // 50000000 stroops = 5 tokens
+    expect(await screen.findByText('5 OUSD')).toBeInTheDocument() // 50000000 stroops = 5 tokens
     expect(screen.getByText(/GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5/)).toBeInTheDocument()
     expect(screen.getByText('In Voting')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Vote For/i })).toBeInTheDocument()

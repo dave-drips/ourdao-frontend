@@ -47,7 +47,11 @@ vi.mock('@/lib/wallet', () => ({
 
 vi.mock('@/lib/stellar', async () => {
   const actual = await vi.importActual<typeof import('@/lib/stellar')>('@/lib/stellar')
-  return { ...actual, isContractConfigured: () => mockContractConfigured }
+  return {
+    ...actual,
+    contractIdStatus: () => mockContractConfigured ? 'valid' : 'unconfigured',
+    isContractConfigured: () => mockContractConfigured,
+  }
 })
 
 vi.mock('@/lib/dao-client', () => ({

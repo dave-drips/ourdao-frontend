@@ -66,6 +66,7 @@ import Skeleton, {
   StatCardSkeleton,
   TableSkeleton,
 } from '@/components/ui/skeleton'
+import { StatCard } from '@/components/ui/stat-card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { VirtualizedList } from '@/components/ui/virtualized-list'
 
@@ -290,6 +291,15 @@ export const SECTIONS: { file: string; render: () => ReactNode }[] = [
         <ActivitySkeleton />
         <DashboardSkeleton />
       </div>
+    ),
+  },
+  {
+    file: 'stat-card',
+    render: () => (
+      <Row>
+        <StatCard label="Treasury balance" value="100 OUSD" />
+        <StatCard label="Treasury balance" loading />
+      </Row>
     ),
   },
   {

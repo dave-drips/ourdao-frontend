@@ -118,6 +118,6 @@ describe('RegisterPage', () => {
     renderWithProviders(<RegisterPage />)
 
     expect(screen.getAllByText('Membership Fee:').length).toBeGreaterThan(0)
-    await waitFor(() => expect(screen.getAllByText('100').length).toBeGreaterThan(0))
+    await waitFor(() => expect(screen.getAllByText('100 OUSD').length).toBeGreaterThan(0))
   })
 })

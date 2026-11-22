@@ -12,11 +12,11 @@ import { SkipLink } from '@/components/SkipLink'
 import { reportError } from '@/lib/error-reporting'
 import { logger } from '@/lib/logger'
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   const [queryClient] = useState(() => createQueryClient())
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
       <QueryClientProvider client={queryClient}>
         <WalletProvider>
           <LiveEventsProvider>
