@@ -1,12 +1,13 @@
-// Highest median LCP per route (ms) across three hydrated Chrome runs:
+// Highest median LCP per route (ms) across four hydrated Chrome runs:
 // https://github.com/ourdao/ourdao-frontend/actions/runs/45034037316/job/137260760757
 // https://github.com/dave-drips/ourdao-frontend/actions/runs/45045552216
 // https://github.com/dave-drips/ourdao-frontend/actions/runs/45046203854
+// https://github.com/dave-drips/ourdao-frontend/actions/runs/45046710589
 // Allow 15% runner variance and round up to the next 100 ms.
 const routeGroups = [
-  { '/': 3823, '/privacy': 3666, '/governance/create': 3930 },
-  { '/governance': 3932, '/loans/request': 3338, '/admin': 3928 },
-  { '/register': 3500, '/dashboard': 3643, '/loans': 4313, '/treasury': 3935 },
+  { '/': 4452, '/privacy': 3666, '/governance/create': 3930 },
+  { '/governance': 3932, '/loans/request': 3637, '/admin': 3928 },
+  { '/register': 3500, '/dashboard': 3663, '/loans': 4313, '/treasury': 3935 },
 ]
 const allRoutes = Object.assign({}, ...routeGroups)
 const urlPrefix = 'http://localhost:3000'
