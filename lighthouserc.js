@@ -45,10 +45,11 @@ module.exports = {
         },
         ...Object.entries(routes).map(([route, median]) => ({
           matchingUrlPattern: `^${urlPrefix}${route}$`,
+          // Fail when even the fastest sample exceeds the route budget.
           assertions: {
             'largest-contentful-paint': [
               'error',
-              { maxNumericValue: Math.ceil((median * 1.15) / 100) * 100, aggregationMethod: 'median' },
+              { maxNumericValue: Math.ceil((median * 1.15) / 100) * 100, aggregationMethod: 'optimistic' },
             ],
           },
         })),
