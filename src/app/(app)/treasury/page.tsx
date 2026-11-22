@@ -154,7 +154,8 @@ export default function TreasuryPage() {
       return BigInt(0)
     }
   })()
-  const hasInsufficientStakeBalance = enteredAmountStroops > token.balance
+  // #656: a failed balance read is not a zero balance; do not block staking on it.
+  const hasInsufficientStakeBalance = !token.isError && enteredAmountStroops > token.balance
   const currentWeight = myStake === null ? null : calculateVotingWeight(myStake, token.decimals)
   const projectedWeight =
     myStake === null ? null : calculateVotingWeight(myStake + enteredAmountStroops, token.decimals)
@@ -295,7 +296,7 @@ export default function TreasuryPage() {
                   Amount ({token.symbol})
                 </label>
                 <span className="text-xs text-muted-foreground">
-                  Balance: {token.format(token.balance)}
+                  Balance: {token.isError ? 'Unavailable' : token.format(token.balance)}
                 </span>
               </div>
               <input
@@ -310,6 +311,14 @@ export default function TreasuryPage() {
                 disabled={!userData.isMember || staking}
                 className="w-full rounded-lg border border-input px-3 py-2.5 text-sm transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:bg-muted"
               />
+              {token.isError && (
+                <p role="alert" className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  <span>Balance unavailable.</span>{' '}
+                  <button type="button" className="underline" onClick={() => token.refetch()}>
+                    Retry
+                  </button>
+                </p>
+              )}
               {hasInsufficientStakeBalance && (
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">
                   Insufficient {token.symbol} balance ({token.format(token.balance)}).
