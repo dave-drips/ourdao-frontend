@@ -778,6 +778,7 @@ export default function LoanDetailsPage() {
                           type="text"
                           value={cidInput}
                           onChange={(e) => setCidInput(e.target.value)}
+                          aria-label="IPFS CID or content hash"
                           placeholder="IPFS CID or content hash…"
                           spellCheck={false}
                           aria-invalid={cidInput.trim().length > 0 && !isCidValid}

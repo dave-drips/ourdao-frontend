@@ -179,8 +179,11 @@ describe('formatDate — locale handling', () => {
     expect(formatDate(date)).toBe(date.toLocaleDateString('de-DE', options))
   })
 
-  it('uses the runtime locale when navigator is unavailable', () => {
-    vi.stubGlobal('navigator', undefined)
+  it.each([
+    ['navigator is unavailable', undefined],
+    ['navigator.language is unset', { language: undefined }],
+  ])('uses the runtime locale when %s', (_description, navigator) => {
+    vi.stubGlobal('navigator', navigator)
 
     expect(formatDate(date)).toBe(date.toLocaleDateString(undefined, options))
   })
