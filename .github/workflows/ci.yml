@@ -146,6 +146,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
       - run: npm run build
+      - name: Package Lighthouse production build
+        if: matrix.node == 20
+        run: |
+          cp -R .next/static .next/standalone/.next/static
+          cp -R public .next/standalone/public
+          tar -czf "$RUNNER_TEMP/lighthouse-build.tar.gz" -C .next/standalone .
+      - name: Upload Lighthouse production build
+        if: matrix.node == 20
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-build
+          path: ${{ runner.temp }}/lighthouse-build.tar.gz
+          retention-days: 1
+          overwrite: true
 
   # Screenshot baselines for the main routes in both themes × two viewports
   # (#270). An unreviewed visual change fails this job and, through `status`,
@@ -391,14 +405,13 @@ jobs:
           path: bundle-composition-current.json
           if-no-files-found: ignore
 
-  # Runs on every PR (same cadence as bundle-size, not scheduled) because
-  # this is a small app where a regression is easy to introduce in any given
-  # PR and cheap to catch immediately — waiting for a nightly/scheduled run
-  # would let a Core Web Vitals regression sit on main for up to a day
-  # before anyone noticed. See lighthouserc.js for the budgets and an
-  # explicit note that they're placeholders pending the first real run.
   lighthouse-ci:
-    name: Lighthouse CI
+    name: Lighthouse CI (group ${{ matrix.group }})
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [0, 1, 2]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -410,19 +423,30 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Cache Next.js build
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Download Lighthouse production build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-      - run: npm run build
+          name: lighthouse-build
+          path: ${{ runner.temp }}
+      - name: Extract Lighthouse production build
+        run: mkdir -p "$RUNNER_TEMP/lighthouse-build" && tar -xzf "$RUNNER_TEMP/lighthouse-build.tar.gz" -C "$RUNNER_TEMP/lighthouse-build"
       - name: Run Lighthouse CI against the production build
-        run: npm run lhci
+        run: npm run lhci -- --collect.startServerCommand="node $RUNNER_TEMP/lighthouse-build/server.js"
         env:
+          HOSTNAME: 127.0.0.1
+          LHCI_ROUTE_GROUP: ${{ matrix.group }}
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+
+  lighthouse-status:
+    name: Lighthouse CI
+    if: always()
+    needs: lighthouse-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: test "$LIGHTHOUSE_RESULT" = success
+        env:
+          LIGHTHOUSE_RESULT: ${{ needs.lighthouse-ci.result }}
 
   # Records each job's outcome as an artifact so the privileged ci-status-comment.yml
   # workflow (triggered via workflow_run, never a fork's copy of it) can post a PR
