@@ -30,7 +30,7 @@ let mockContractConfigured = true
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/dashboard',
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }))
 
 vi.mock('@/lib/wallet', () => ({
