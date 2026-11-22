@@ -326,19 +326,20 @@ jobs:
           stellar --version
       - name: Fetch or build contract wasm
         id: wasm
+        env:
+          REF: ${{ steps.ref.outputs.ref }}
         run: |
-          REF="${{ steps.ref.outputs.ref }}"
           mkdir -p /tmp/ourdao-contract
           WASM_URL="https://github.com/ourdao/ourdao-contracts/releases/download/${REF}/ourdao_dao.optimized.wasm"
           if curl -fsSL "$WASM_URL" -o /tmp/ourdao-contract/ourdao_dao.optimized.wasm; then
             echo "path=/tmp/ourdao-contract/ourdao_dao.optimized.wasm" >> "$GITHUB_OUTPUT"
           else
             echo "No release asset at ${WASM_URL}; building ourdao-contracts @ ${REF} from source"
-            git clone --depth 1 https://github.com/ourdao/ourdao-contracts.git /tmp/ourdao-contracts-src
-            git -C /tmp/ourdao-contracts-src fetch --depth 1 origin "$REF"
+            git init -q /tmp/ourdao-contracts-src
+            git -C /tmp/ourdao-contracts-src fetch --depth 1 https://github.com/ourdao/ourdao-contracts.git "$REF"
             git -C /tmp/ourdao-contracts-src checkout FETCH_HEAD
             rustup target add wasm32v1-none
-            cargo build --manifest-path /tmp/ourdao-contracts-src/Cargo.toml --locked --target wasm32v1-none --release
+            cargo build --manifest-path /tmp/ourdao-contracts-src/Cargo.toml --locked --target wasm32v1-none --release -p ourdao-dao
             echo "path=/tmp/ourdao-contracts-src/target/wasm32v1-none/release/ourdao_dao.wasm" >> "$GITHUB_OUTPUT"
           fi
       - name: Check contract bindings against wasm

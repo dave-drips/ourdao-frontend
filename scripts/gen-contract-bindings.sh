@@ -34,11 +34,14 @@ stellar contract bindings typescript --wasm "$wasm" --output-dir "$tmp" --overwr
   # The contract has a parameter named `private`, a reserved word that cannot
   # be a binding name in strict mode. Where it appears in a destructured
   # parameter, take the object whole instead (the type keeps the `private` key).
-  sed -E 's/\(\{[^}]*\bprivate\}: /(args: /' "$tmp/src/index.ts"
+  sed -E 's/\(\{([^}]*, )?private(, [^}]*)?\}: /(args: /' "$tmp/src/index.ts"
 } > "$generated"
 
 if [[ "$check" == true ]]; then
-  if ! diff -u "$out" "$generated"; then
+  # Scheduled checks compare against a different ref; the source line is metadata.
+  if ! diff -u -L "$out" -L "generated bindings ($ref)" \
+    <(sed '2{/^\/\/ Source: ourdao-contracts @ /d;}' "$out") \
+    <(sed '2{/^\/\/ Source: ourdao-contracts @ /d;}' "$generated"); then
     echo "error: $out is out of date with ourdao-contracts @ ${ref}. Run: npm run gen:contract -- <path-to-ourdao_dao.wasm> ${ref}" >&2
     exit 1
   fi
