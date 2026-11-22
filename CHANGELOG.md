@@ -63,7 +63,7 @@ report can name the entry below it came from. See
   successful treasury vote in the current member's vote state (#311, #318).
 
 Backend: ourdao-backend unversioned (main; no tagged release to pin yet)
-Contracts: ourdao-contracts @ 16e4222
+Contracts: ourdao-contracts @ 16e4222fbe77192ca888cd3739aca8fdb02150a4
 
 ## [0.1.0] - 2026-09-26
 
