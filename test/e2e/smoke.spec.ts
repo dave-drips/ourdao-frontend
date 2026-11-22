@@ -66,6 +66,7 @@ test.describe('E2E Smoke Tests', () => {
     // Verify successful registration banner or feedback
     await expect(page.getByText('Registration successful! Welcome to the DAO!')).toBeVisible({ timeout: 15_000 })
     await expect(page).toHaveURL(/\/dashboard$/)
+    await expect(page.getByRole('heading', { name: 'Member Dashboard' })).toBeVisible()
   })
 
   test('flow 4: request loan flow', async ({ page }) => {
