@@ -30,6 +30,7 @@ import { OrbitMark } from '@/components/OrbitMark'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useUserData, useDAOStats } from '@/hooks/useDAO'
+import { useStreamStatus } from '@/hooks/useLiveEvents'
 import { buildLabel } from '@/lib/build-info'
 import { isBackendConfigured } from '@/lib/backend'
 import { contractIdStatus } from '@/lib/stellar'
@@ -114,6 +115,22 @@ function BuildLabel() {
   return <p className="px-6 pt-4 text-xs text-muted-foreground">{buildLabel()}</p>
 }
 
+const STREAM_STATUS_TEXT = {
+  connected: 'Live',
+  reconnecting: 'Reconnecting',
+  offline: 'Offline',
+}
+
+function LiveConnectionStatus() {
+  const status = useStreamStatus()
+  return (
+    <span role="status" aria-live="polite" className="text-xs text-muted-foreground">
+      <span className="sr-only">Live updates: </span>
+      {STREAM_STATUS_TEXT[status]}
+    </span>
+  )
+}
+
 interface AppShellProps {
   children: ReactNode
 }
@@ -155,7 +172,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* The skip link is rendered once, globally, by Providers (SkipLink). */}
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
-        <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+        <div className="flex min-h-16 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-1 sm:flex-nowrap sm:px-6">
           <SheetTrigger asChild>
             <button
               type="button"
@@ -165,8 +182,11 @@ export function AppShell({ children }: AppShellProps) {
               <Menu className="h-6 w-6" />
             </button>
           </SheetTrigger>
-          <BrandMark />
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-col">
+            <BrandMark />
+            <LiveConnectionStatus />
+          </div>
+          <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
             <NetworkBadge />
             <ThemeToggle />
             <NotificationCenter />

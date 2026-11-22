@@ -14,6 +14,7 @@ import { asBigInt, mapLoanTerms, resolveLoanPolicy, toLoan, toMemberStatus } fro
 import type { UILoanPolicy, UILoanTerms } from '@/lib/dao-mappers'
 import { queryKeys } from '@/lib/query-keys'
 import { QUERY_REFRESH_INTERVAL_MS } from '@/constants'
+import { useStreamPolling } from '@/hooks/useLiveEvents'
 
 /**
  * Calculates member voting weight based on documented staking formula:
@@ -55,6 +56,7 @@ export function useUserData(): UserData {
 
   const isMember = !!data?.isMember
   const backendConfigured = isBackendConfigured()
+  const loansPolling = useStreamPolling(backendConfigured && isMember)
 
   // Loan history comes from the off-chain indexer (the contract keeps no
   // queryable per-member loan list).
@@ -65,10 +67,7 @@ export function useUserData(): UserData {
     queryKey: address ? queryKeys.userLoans(address) : queryKeys.userLoansDisabled(),
     enabled: !!address && backendConfigured && (!isContractConfigured() || isMember),
     queryFn: ({ signal }) => backend.getLoans(address!, { signal }),
-    refetchInterval: () => {
-      if (!backendConfigured || !isMember) return false
-      return QUERY_REFRESH_INTERVAL_MS
-    },
+    refetchInterval: loansPolling,
     refetchIntervalInBackground: false,
   })
 
@@ -404,11 +403,12 @@ export function useDAOEvents() {
 /** Interest distributions history from ourdao-backend with optional cursor pagination. */
 export function useInterestDistributions(options?: { before?: number; limit?: number }) {
   const backendConfigured = isBackendConfigured()
+  const refetchInterval = useStreamPolling(backendConfigured)
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.interestDistributions(options?.before),
     enabled: backendConfigured,
     queryFn: ({ signal }) => backend.getInterestDistributions(options, { signal }),
-    refetchInterval: backendConfigured ? QUERY_REFRESH_INTERVAL_MS : false,
+    refetchInterval,
     refetchIntervalInBackground: false,
   })
 
@@ -456,11 +456,12 @@ export function useMemberActivity(address?: string | null, limit = 50) {
  *  no queryable member list, so this is the only source for a members page. */
 export function useMembers(limit = 50) {
   const backendConfigured = isBackendConfigured()
+  const refetchInterval = useStreamPolling(backendConfigured)
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.members(limit),
     enabled: backendConfigured,
     queryFn: ({ signal }) => backend.getMembers(limit, { signal }),
-    refetchInterval: backendConfigured ? QUERY_REFRESH_INTERVAL_MS : false,
+    refetchInterval,
     refetchIntervalInBackground: false,
   })
   return {

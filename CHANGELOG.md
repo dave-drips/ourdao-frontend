@@ -20,6 +20,7 @@ report can name the entry below it came from. See
 ## [Unreleased]
 
 ### Added
+- Live DAO updates refresh affected pages as indexer events arrive. The app header shows connection status, and covered queries return to polling during an outage. Private notifications keep polling (#554).
 - A **Fund now** (loan) / **Execute** (treasury withdrawal) action on proposals that passed their vote while the treasury was short, so any member can complete them once the treasury is topped up; contract failures such as `InsufficientTreasury` are shown in plain language (#540).
 - A test guard that fails when a DOM-touching test file lands without `// @vitest-environment jsdom` (#539).
 - Per-module coverage floors for `dao-client.ts` and `wallet.tsx`, tests for every `daoWrite` entrypoint and the wallet connect/restore/sign flows, and a coverage provider pin matching the installed vitest (#327, #328, #329).
